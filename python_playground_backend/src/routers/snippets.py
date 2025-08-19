@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
@@ -91,7 +91,6 @@ def update_snippet(
 @router.delete(
     "/{snippet_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    response_class=Response,
     summary="Delete snippet",
     description="Delete a snippet owned by the current user.",
 )
@@ -100,15 +99,10 @@ def delete_snippet(
     snippet_id: int = Path(..., description="Snippet ID"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> None:
-    """Delete an existing snippet. Only the owner may delete.
-
-    Note:
-        For HTTP 204 No Content, do not return any body from the handler.
-    """
+):
+    """Delete an existing snippet. Only the owner may delete."""
     snip = db.get(Snippet, snippet_id)
     if not snip or snip.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Snippet not found")
     db.delete(snip)
     db.commit()
-    # No return value to ensure the response body is empty for 204 No Content.
