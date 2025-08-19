@@ -101,11 +101,14 @@ def delete_snippet(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> None:
-    """Delete an existing snippet. Only the owner may delete."""
+    """Delete an existing snippet. Only the owner may delete.
+
+    Note:
+        For HTTP 204 No Content, do not return any body from the handler.
+    """
     snip = db.get(Snippet, snippet_id)
     if not snip or snip.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Snippet not found")
     db.delete(snip)
     db.commit()
-    # Explicitly return an empty Response to comply with HTTP 204 (no body allowed)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    # No return value to ensure the response body is empty for 204 No Content.
