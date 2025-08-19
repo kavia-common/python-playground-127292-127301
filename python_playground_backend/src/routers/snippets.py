@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status, Response
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
@@ -91,6 +91,7 @@ def update_snippet(
 @router.delete(
     "/{snippet_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
     summary="Delete snippet",
     description="Delete a snippet owned by the current user.",
 )
@@ -106,4 +107,5 @@ def delete_snippet(
         raise HTTPException(status_code=404, detail="Snippet not found")
     db.delete(snip)
     db.commit()
-    return None
+    # Explicitly return an empty Response to comply with HTTP 204 (no body allowed)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
